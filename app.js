@@ -226,7 +226,7 @@ function App(options) {
 	// Future dev
 	//	self.importModule(name, fn)
 
-	// Core startup.
+	// Core startup
 	
 	settings = defaultSettings;
 	
