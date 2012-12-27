@@ -1,3 +1,7 @@
+/**
+ * App - Default lightweight framework for small JS applications.
+ * @author Sean Nessworthy 
+ */
 function App(options) {
 	
 	// Default config
@@ -17,7 +21,9 @@ function App(options) {
 			'nameSpaceCore': 'core',
 			// Separator for app namespaces.
 			'nameSpaceSeparator': '.'
-		}
+		},
+		// Default module list. Use this for constant core modules.
+		'moduleList' : ['testModule']
 	}
 	
 	// Define storage
@@ -26,6 +32,15 @@ function App(options) {
 	var functions = {};
 	var events = {};
 	var settings = {};
+	
+	// MODULES
+	
+	modules.testModule = function() {
+		watch('test',function() {alert('hello!')});
+		fire('test');
+		
+		return true;
+	}
 	
 	// Define core functions
 	
@@ -37,7 +52,7 @@ function App(options) {
 	 */
 	function bind (fn_name, fn) {
 		
-		logName = [settings.debug.nameSpaceCore,'bind'];
+		var logName = [settings.debug.nameSpaceCore,'bind'];
 		
 		if(typeof fn_name == 'string') {
 			if(typeof fn == 'function') {
@@ -74,7 +89,7 @@ function App(options) {
 	 * @return {Mixed} FALSE if the function failed, or the function's return value.
 	 */
 	function call (fn_name, options) {
-		logName = [settings.debug.nameSpaceCore,'call'];
+		var logName = [settings.debug.nameSpaceCore,'call'];
 		
 		if(typeof fn_name == 'string') {
 				
@@ -100,13 +115,39 @@ function App(options) {
 	}
 
 	/**
+	 * Fire - Fires all callback triggers for a specific event.
+	 * @param {String} trigger_name The event's name.
+	 * @param {Mixed} details The event information. E.g. a specific element.
+	 * @return {Boolean} TRUE if all triggers were fired. FALSE if not.
+	 */
+	function fire(trigger_name, details) {
+		var logName = [settings.debug.nameSpaceCore,'fire'];
+		
+		if(typeof trigger_name == 'string') {
+			if(typeof events[trigger_name] != 'undefined') {
+				for(i=0;i<events[trigger_name].length;i++) {
+					events[trigger_name][i](details);
+				}
+			}
+			
+			return true;
+			
+		} else {
+			log(logName, ['trigger_name needs to be a string.',trigger_name], 'error');
+		}
+		
+		return false;
+		
+	}
+
+	/**
 	 * Watch - Add a callback trigger for when an event is fired.
 	 * @param {String} trigger_name A string containing the event's name.
 	 * @param {Function} callback A function which is called when the event is fired.
 	 * @return {Boolean} TRUE if the callback is successfully added. FALSE if not.
 	 */
 	function watch(trigger_name, callback) {
-		logName = [settings.debug.nameSpaceCore,'watch'];
+		var logName = [settings.debug.nameSpaceCore,'watch'];
 		
 		if(typeof trigger_name == 'string') {
 			if(typeof callback == 'function') {
@@ -158,6 +199,56 @@ function App(options) {
 		
 	}
 
+	function loadModule(module_name, module_data) {
+		var logName = [settings.debug.nameSpaceCore,'loadModule'];
+		
+		console.group("Module: "+module_name)
+		console.time('Load Time');
+		if(typeof modules[module_name] == 'function') {
+			try {
+				
+				result = modules[module_name](module_config);
+				
+				if(result === true) {
+					log(logName,'Module loaded successfully.','info');
+				} else if (result === false) {
+					log(logName,'Module loaded, but discarded','info');
+				} else {
+					log(logName,'Module loaded, but did not return the expected information.','warn');
+				}
+			} catch (error) {
+				log(logName,['Module has encountered an uncaught exception:', error],'error');
+			}
+		} else {
+			log(logName,['Module failed to load:','Module not located'],'error');
+		}
+		console.timeEnd('Load Time');
+		console.groupEnd("Module: "+module_name);
+		
+	}
+
 	// Define helper methods
+	
+	// Core startup.
+	
+	settings = defaultSettings;
+	
+	// Load those modules, baby.
+	for(var i=0; i < settings.moduleList.length; i++) {
+		
+		module_data = settings.moduleList[i];
+		
+		module_config = null;
+		module_name = false;
+		
+		if(typeof module_data != 'string') {
+			module_name = module_data[0];
+			module_config = module_data[1];
+		} else {
+			module_name = module_data;
+		}
+		
+		loadModule(module_name, module_config);
+	}
 	
 }
