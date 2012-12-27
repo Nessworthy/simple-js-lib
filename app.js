@@ -23,7 +23,7 @@ function App(options) {
 			'nameSpaceSeparator': '.'
 		},
 		// Default module list. Use this for constant core modules.
-		'moduleList' : ['testModule']
+		'moduleList' : []
 	}
 	
 	// Define storage
@@ -34,13 +34,9 @@ function App(options) {
 	var settings = {};
 	
 	// MODULES
+	// (not order specific)
 	
-	modules.testModule = function() {
-		watch('test',function() {alert('hello!')});
-		fire('test');
-		
-		return true;
-	}
+	
 	
 	// Define core functions
 	
@@ -57,8 +53,8 @@ function App(options) {
 		if(typeof fn_name == 'string') {
 			if(typeof fn == 'function') {
 				
-				allowedToOverwrite = settings.globalFunctions.bindOverWrite;
-				functionExists = false;
+				var allowedToOverwrite = settings.globalFunctions.bindOverWrite;
+				var functionExists = false;
 				
 				if(typeof functions[fn_name] == 'function') {
 					functionExists = true;
@@ -93,7 +89,7 @@ function App(options) {
 		
 		if(typeof fn_name == 'string') {
 				
-			functionExists = false;
+			var functionExists = false;
 			
 			if(typeof functions[fn_name] == 'function') {
 				functionExists = true;
@@ -179,7 +175,7 @@ function App(options) {
 	 */
 	function log(moduleName, message, type) {
 		
-		debugSettings = settings.debug;
+		var debugSettings = settings.debug;
 		
 		if(debugSettings.enabled === true) {
 			
@@ -207,12 +203,12 @@ function App(options) {
 		if(typeof modules[module_name] == 'function') {
 			try {
 				
-				result = modules[module_name](module_config);
+				var result = modules[module_name](module_config);
 				
 				if(result === true) {
 					log(logName,'Module loaded successfully.','info');
 				} else if (result === false) {
-					log(logName,'Module loaded, but discarded','info');
+					log(logName,'Module loaded, but discarded.','info');
 				} else {
 					log(logName,'Module loaded, but did not return the expected information.','warn');
 				}
@@ -227,8 +223,9 @@ function App(options) {
 		
 	}
 
-	// Define helper methods
-	
+	// Future dev
+	//	self.importModule(name, fn)
+
 	// Core startup.
 	
 	settings = defaultSettings;
