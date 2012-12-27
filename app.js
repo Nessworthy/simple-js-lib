@@ -37,11 +37,26 @@ function App(options) {
 	 */
 	function bind (fn_name, fn) {
 		if(typeof fn_name == 'string') {
-			if(typeof fn == 'object') {
+			if(typeof fn == 'function') {
 				
+				allowedToOverwrite = settings.globalFunctions.bindOverWrite;
+				functionExists = false;
+				
+				if(typeof functions[fn_name] == 'function') {
+					functionExists = true;
+				}
+				
+				if(!functionExists || (functionExists && allowedToOverwrite === true)) {
+					functions[fn_name] = fn;
+				} else {
+					log([settings.debug.nameSpaceCore,'bind'], 'A function already exists called '+fn_name+', and the app does not have permission to overwrite.', 'error');
+				}
+				
+			} else {
+				log([settings.debug.nameSpaceCore,'bind'], ['fn parameter passed needs to be a function.',fn], 'error');
 			}
 		} else {
-			log([settings.debug.nameSpaceCore,'bind'], 'error', '');
+			log([settings.debug.nameSpaceCore,'bind'], ['Function name needs to be a string.',fn_name], 'error');
 		}
 	}
 	
