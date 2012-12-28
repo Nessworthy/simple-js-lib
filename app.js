@@ -348,9 +348,16 @@ function App(options) {
 	 * addModule - Adds a module to the application. Optional support for auto loading.
 	 * @param {String} moduleName The module's name.
 	 * @param {Function} module The module.
+	 * @param {Mixed} autoLoad Pass TRUE or FALSE to force autoload of module or not, pass null to fallback to settings.
+	 * @param {Mixed} config Optional configuration settings to pass to the module.
 	 * @param {Boolean} autoLoad Whether to autoload the module or not (optional, default = NULL (relies on setting))
 	 */
-	this.addModule = function(moduleName, module, autoLoad) {
+	this.addModule = function(moduleName, module, autoLoad, config) {
+		
+		if(typeof config == 'undefined') {
+			config = null;
+		}
+		
 		var logName = [settings.debug.nameSpaceCore,'addModule'];
 		
 		if(typeof moduleName == 'string') {
@@ -372,11 +379,11 @@ function App(options) {
 					if(autoLoad === true || (settings.modules.autoLoadOnImport === true && autoLoad !== false)) {
 						
 						// Load it.
-						loadModule(moduleName, options);
+						loadModule(moduleName, config);
 						
 					} else {
 						
-						addModuleToQueue(moduleName);
+						addModuleToQueue(moduleName, config);
 						
 					}
 					
