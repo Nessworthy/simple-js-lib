@@ -412,8 +412,23 @@ function App(options) {
 		
 	}
 
-	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as an override.
-	// ^ Is this needed?
+	/**
+	 * loadModuleFromQueue - Self explanatory.
+	 * @param {String} moduleName the module's name. 
+	 */
+	function loadModuleFromQueue(moduleName) {
+		// TODO: Log name, test if string.
+		
+		var index = getModulePositionInQueue(moduleName);
+		
+		if(index !== false) {
+			
+			// If true?
+			loadModule(moduleName, addedModules[index].config);
+			removeModuleFromQueue(index);
+			
+		}
+	}
 
 	// Public methods.
 	
