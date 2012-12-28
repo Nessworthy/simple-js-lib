@@ -412,8 +412,13 @@ function App(options) {
 		
 	}
 
-	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as an override.
-	// ^ Is this needed?
+	/**
+	 * loadModuleFromQueue - Self explanatory.
+	 * @param {String} moduleName the module's name. 
+	 */
+	function loadModuleFromQueue(moduleName) {
+		// TODO: Finish this method.
+	}
 
 	// Public methods.
 	
