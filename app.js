@@ -378,6 +378,11 @@ function App(options) {
 		
 	}
 
+	/**
+	 * getModulePositionInQueue - Takes a module's name and attempts to find where it is in the queue.
+	 * @param {String} moduleName The module's name. 
+	 * @return {Mixed} an int with the index if it can be found, FALSE if it cannot.
+	 */
 	function getModulePositionInQueue(moduleName) {
 		
 		var logName = [settings.debug.nameSpaceCore,'getModulePositionInQueue'];
@@ -404,7 +409,6 @@ function App(options) {
 	}
 
 	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as !important
-	// TODO: getModulePositionInQueue(moduleName)
 
 	// Public methods.
 	
