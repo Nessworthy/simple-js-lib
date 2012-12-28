@@ -1,6 +1,6 @@
 /**
- * App - Default lightweight framework for small JS applications.
- * @author Sean Nessworthy 
+ * App - Default lightweight framework for small JavaScript applications.
+ * @author Sean Nessworthy
  */
 function App(options) {
 	
