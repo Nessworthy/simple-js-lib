@@ -121,7 +121,7 @@ function App(options) {
 	 * Fire - Fires all callback triggers for a specific event.
 	 * @param {String} trigger_name The event's name.
 	 * @param {Mixed} details The event information. E.g. a specific element.
-	 * @return {Boolean} TRUE if all triggers were fired. FALSE if not.
+	 * @return {Boolean} TRUE if all triggers were fired. FALSE if not
 	 */
 	function fire(trigger_name, details) {
 		var logName = [settings.debug.nameSpaceCore,'fire'];
