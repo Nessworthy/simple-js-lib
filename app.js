@@ -193,7 +193,6 @@ function App(options) {
 			if(typeof type == 'undefined' || type === null || type === false) {
 				type = 'log';
 			}
-			
 			console[type](debugSettings.nameSpace+debugSettings.nameSpaceSeparator+moduleName,message);
 			return true;
 		}
@@ -202,7 +201,12 @@ function App(options) {
 		
 	}
 
-	function loadModule(module_name, module_data) {
+	/**
+	 * loadModule - Loads a module (executes it's code).
+	 * @param {String} module_name The module's name.
+	 * @param {Mixed} module_config Any module options that should be passed to the module.
+	 */
+	function loadModule(module_name, module_config) {
 		var logName = [settings.debug.nameSpaceCore,'loadModule'];
 		
 		console.group("Module: "+module_name)
@@ -221,7 +225,7 @@ function App(options) {
 				}
 				
 			} catch (error) {
-				log(logName,['Module has encountered an uncaught exception:', error],'error');
+				log(logName,['Module has encountered an uncaught exception', error],'error');
 			}
 		} else {
 			log(logName,['Module failed to load:','Module not located'],'error');
@@ -229,6 +233,37 @@ function App(options) {
 		console.timeEnd('Load Time');
 		console.groupEnd("Module: "+module_name);
 		
+	}
+	
+	function importModule(moduleName, module) {
+		var logName = [settings.debug.nameSpaceCore,'importModule'];
+		
+		if(typeof moduleName == 'string') {
+		
+			if(typeof module == 'function') {
+				
+				var moduleExists = false;
+				
+				if(typeof modules[moduleName] == 'function') {
+					moduleExists = true;
+				}				
+
+				if(!moduleExists || settings.modules.allowOverwrite === true) {
+					modules[moduleName] = module;
+					return true;
+				} else {
+					log(logName,'Could not import module because a module exists by the name of '+moduleName+'. Check your module overwrite settings.','error');
+				}
+				
+			} else {
+				log(logName,['module expected a function.',module],'error');
+			}
+			
+		} else {
+			log(logName,['moduleName expected a string.',moduleName],'error');
+		}
+		
+		return false;
 	}
 
 	// Public methods.
@@ -239,28 +274,32 @@ function App(options) {
 	 * @param {Function} module The module.
 	 * @param {Boolean} autoLoad Whether to autoload the module or not (optional, default = FALSE)
 	 */
-	self.addModule = function(moduleName, module, autoLoad) {
+	this.addModule = function(moduleName, module, autoLoad) {
 		var logName = [settings.debug.nameSpaceCore,'addModule'];
 		
 		if(typeof moduleName == 'string') {
 		
 			if(typeof module == 'function') {
-				
-				if(autoLoad !== true) {
-					autoLoad = false;
+
+				if(autoLoad !== true && autoLoad !== false) {
+					autoLoad = null;
 				}
 		
 				// Import it.
 				result = importModule(moduleName,module);
 				
+				if(result === true) {
+					log(logName,'Module '+moduleName+' imported!', 'info');
+				} else {
+					log(logName,'Module '+moduleName+' was not imported.', 'error');
+				}
+				
 				// Are we auto loading the module?
-				if(result === true && (autoLoad === true || settings.modules.autoLoadOnImport === true)) {
+				if(result === true && (autoLoad === true || (settings.modules.autoLoadOnImport === true && autoLoad !== false))) {
 					
 					// Load it.
 					loadModule(moduleName, options);
 					
-				} else {
-					log(logName, 'Module could not be loaded.');
 				}
 			} else {
 				log(logName,['module expected a function.',module],'error');
