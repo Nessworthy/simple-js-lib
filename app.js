@@ -413,6 +413,7 @@ function App(options) {
 	}
 
 	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as an override.
+	// ^ Is this needed?
 
 	// Public methods.
 	
