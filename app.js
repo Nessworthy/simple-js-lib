@@ -417,7 +417,18 @@ function App(options) {
 	 * @param {String} moduleName the module's name. 
 	 */
 	function loadModuleFromQueue(moduleName) {
-		// TODO: Finish this method.
+		
+		// TODO: Log name, test if string.
+		
+		var index = getModulePositionInQueue(moduleName);
+		
+		if(index !== false) {
+			
+			// If true?
+			loadModule(moduleName, addedModules[index].config);
+			removeModuleFromQueue(index);
+			
+		}
 	}
 
 	// Public methods.
