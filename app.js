@@ -26,8 +26,10 @@ function App(options) {
 		'modules': {
 			// If enabled, any additional modules added via loadModule will overwrite any existing ones.
 			'allowOverwrite' : true,
-			// If TRUE, any mods imported using app.addModule will be automatically loaded. NOTE that this will prevent any options being passed to it.
-			'autoLoadOnImport': true
+			// If TRUE, any mods imported using app.addModule will be automatically loaded.
+			'autoLoadOnImport': false,
+			// If TRUE, all modules loaded with this application will be autoloaded on startup.
+			'autoLoadOnStart': false
 		},
 		// Default module list. Use this for constant core modules.
 		'moduleList' : []
@@ -39,6 +41,7 @@ function App(options) {
 	var functions = {};
 	var events = {};
 	var settings = {};
+	var addedModules = [];
 	
 	// MODULES
 	// (not order specific)
@@ -207,6 +210,7 @@ function App(options) {
 	 * @param {Mixed} module_config Any module options that should be passed to the module.
 	 */
 	function loadModule(module_name, module_config) {
+		
 		var logName = [settings.debug.nameSpaceCore,'loadModule'];
 		
 		console.group("Module: "+module_name)
@@ -237,7 +241,12 @@ function App(options) {
 		
 	}
 	
-	// Requires documentation
+	/**
+	 * importModule - Adds a module to the module list. This does NOT trigger autoload on its own.
+	 * @param {String} moduleName The module name.
+	 * @param {Function} module The module. 
+	 * @return {Boolean} TRUE if import was successful, FALSE if not.
+	 */
 	function importModule(moduleName, module) {
 		var logName = [settings.debug.nameSpaceCore,'importModule'];
 		
@@ -269,15 +278,158 @@ function App(options) {
 		return false;
 	}
 
+	/**
+	 * addModuleToQueue - Does exactly what it says on the tin.
+	 * @param {String} moduleName The module name.
+	 * @param {Mixed} moduleConfig Any config settings passed to the module.
+	 * @return {Boolean} TRUE if successful, FALSE if not.
+	 */
+	function addModuleToQueue(moduleName, moduleConfig) {
+		var logName = [settings.debug.nameSpaceCore,'addModuleToQueue'];
+		
+		if(typeof moduleName == 'string') {
+			
+			var moduleExists = false;
+			
+			if (getModulePositionInQueue(moduleName) !== false) {
+				moduleExists = true;
+			}
+			
+			if(!moduleExists || settings.modules.allowOverwrite === true) {
+				
+				var index;
+				
+				if(moduleExists) {
+					removeModuleFromQueue(moduleName);
+				}
+				
+				// Add. Also, make sure config is null if non-existant.
+				if(typeof moduleConfig == 'undefined') {
+					moduleConfig = null;
+				}
+				
+				addedModules.push({name: moduleName, config: moduleConfig});
+			
+				return true;
+				
+			} else {
+				log(logName,'Could not add '+moduleName+' to queue. The module already exists and cannot be overwritten with the current settings.','error');
+			}
+			
+		} else {
+			log(logName,['moduleName expected a string.',moduleName],'error');
+		}
+		
+		return false;
+		
+	}
+
+	/**
+	 * loadAllModulesFromQueue - Self explanitory. 
+	 */
+	function loadAllModulesFromQueue() {
+		var logName = [settings.debug.nameSpaceCore,'loadAllModulesFromQueue'];
+		while(addedModules.length > 0) {
+			
+			var module = addedModules[0];
+			
+			loadModule(module.name,module.config);
+			
+			// Passing the index is faster.
+			if(removeModuleFromQueue(0) !== true) {
+				log(logName,'Could not remove module '+moduleName+' from the queue. Recursion prevented.','error');
+				break;
+			}
+			
+		}
+	}
+
+	/**
+	 * removeModuleFromQueue
+	 * @param {Mixed} module Either an index (queue) number or the module name. 
+	 * @return {Boolean} TRUE if successful, FALSE if not.
+	 */
+	function removeModuleFromQueue(module) {
+		var logName = [settings.debug.nameSpaceCore,'removeModuleFromQueue'];
+		var returnVal = false;
+		
+		if (typeof module == 'number') {
+			if (typeof addedModules[module] != 'undefined') {
+				returnVal = true;
+				addedModules.splice(module,1);
+			} else {
+				returnVal = false;
+				log(logName,'Could not find module queue position '+moduleName+' in the queue.','warn');
+			}
+		} else if (typeof module == 'string') {
+			
+			// So here we need to iterate through the queue and find the module by name.
+			
+			var index = getModulePositionInQueue(module);
+			
+			if(index !== false) {
+				returnVal = true;
+				addedModules.splice(index,1);
+			} else {
+				log(logName,'Could not find module '+moduleName+' in the queue.','warn');
+			}
+			
+		} else {
+			log(logName,['module expected an int or a string.',module],'error');
+		}
+		
+		return returnVal;
+		
+	}
+
+	/**
+	 * getModulePositionInQueue - Takes a module's name and attempts to find where it is in the queue.
+	 * @param {String} moduleName The module's name. 
+	 * @return {Mixed} an int with the index if it can be found, FALSE if it cannot.
+	 */
+	function getModulePositionInQueue(moduleName) {
+		
+		var logName = [settings.debug.nameSpaceCore,'getModulePositionInQueue'];
+		
+		if (typeof moduleName == 'string') {
+
+			for(var i=0,queue=addedModules;i<queue.length;i++) {
+					
+				var mod = queue[i];
+	
+				if(mod.name == moduleName) {
+					return i;
+				} else {
+					continue;
+				}
+			}
+		
+		} else {
+			log(logName,['moduleName expected a string.',moduleName],'error');
+		}
+		
+		return false;
+		
+	}
+
+	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as an override.
+
 	// Public methods.
 	
 	/**
 	 * addModule - Adds a module to the application. Optional support for auto loading.
 	 * @param {String} moduleName The module's name.
 	 * @param {Function} module The module.
-	 * @param {Boolean} autoLoad Whether to autoload the module or not (optional, default = FALSE)
+	 * @param {Mixed} autoLoad Pass TRUE or FALSE to force autoload of module or not, pass null to fallback to settings.
+	 * @param {Mixed} config Optional configuration settings to pass to the module.
+	 * @param {Boolean} autoLoad Whether to autoload the module or not (optional, default = NULL (relies on setting))
 	 */
-	this.addModule = function(moduleName, module, autoLoad) {
+	this.addModule = function(moduleName, module, autoLoad, config) {
+		
+		if(typeof config == 'undefined') {
+			config = null;
+		}
+		
 		var logName = [settings.debug.nameSpaceCore,'addModule'];
 		
 		if(typeof moduleName == 'string') {
@@ -292,18 +444,25 @@ function App(options) {
 				result = importModule(moduleName,module);
 				
 				if(result === true) {
+					
 					log(logName,'Module '+moduleName+' imported!', 'info');
+					
+					// Are we autoloading?
+					if(autoLoad === true || (settings.modules.autoLoadOnImport === true && autoLoad !== false)) {
+						
+						// Load it.
+						loadModule(moduleName, config);
+						
+					} else {
+						
+						addModuleToQueue(moduleName, config);
+						
+					}
+					
 				} else {
 					log(logName,'Module '+moduleName+' was not imported.', 'error');
 				}
 				
-				// Are we auto loading the module?
-				if(result === true && (autoLoad === true || (settings.modules.autoLoadOnImport === true && autoLoad !== false))) {
-					
-					// Load it.
-					loadModule(moduleName, options);
-					
-				}
 			} else {
 				log(logName,['module expected a function.',module],'error');
 			}
@@ -313,27 +472,41 @@ function App(options) {
 		}
 		
 	}
+	
+	/**
+	 * loadModules - self explanatory! 
+	 */
+	this.loadModules = function() {
+		loadAllModulesFromQueue();
+	}
 
 	// Core startup
 	
 	settings = defaultSettings;
 	
-	// Load those modules, baby.
+	// Load those modules, baby. (or add them to the queue to load)
 	for(var i=0; i < settings.moduleList.length; i++) {
-		
+			
 		module_data = settings.moduleList[i];
-		
+			
 		module_config = null;
 		module_name = false;
-		
+			
 		if(typeof module_data != 'string') {
 			module_name = module_data[0];
 			module_config = module_data[1];
 		} else {
 			module_name = module_data;
 		}
+			
+		addModuleToQueue(module_name, module_config);
 		
-		loadModule(module_name, module_config);
+	}
+	
+	if(settings.modules.autoLoadOnStart === true) {
+		
+		loadAllModulesFromQueue();
+			
 	}
 	
 }
