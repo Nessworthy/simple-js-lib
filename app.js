@@ -291,7 +291,7 @@ function App(options) {
 			
 			var moduleExists = false;
 			
-			if (moduleExistsInQueue(moduleName)) {
+			if (getModulePositionInQueue(moduleName) !== false) {
 				moduleExists = true;
 			}
 			
@@ -361,20 +361,7 @@ function App(options) {
 			
 			// So here we need to iterate through the queue and find the module by name.
 			
-			var index = false;
-			
-			for(var i=0,queue=addedModules;i<queue.length;i++) {
-				
-				var mod = queue[i];
-				
-				
-				if(mod.name == module) {
-					index = i;
-					break;
-				} else {
-					continue;
-				}
-			}
+			var index = getModulePositionInQueue(module);
 			
 			if(index !== false) {
 				returnVal = true;
@@ -390,9 +377,34 @@ function App(options) {
 		return returnVal;
 		
 	}
-	// TODO: removeModuleFromQueue(moduleName or loadIndex)
+
+	function getModulePositionInQueue(moduleName) {
+		
+		var logName = [settings.debug.nameSpaceCore,'getModulePositionInQueue'];
+		
+		if (typeof moduleName == 'string') {
+
+			for(var i=0,queue=addedModules;i<queue.length;i++) {
+					
+				var mod = queue[i];
+	
+				if(mod.name == moduleName) {
+					return i;
+				} else {
+					continue;
+				}
+			}
+		
+		} else {
+			log(logName,['moduleName expected a string.',moduleName],'error');
+		}
+		
+		return false;
+		
+	}
+
 	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as !important
-	// TODO: moduleExistsInQueue(moduleName)
+	// TODO: getModulePositionInQueue(moduleName)
 
 	// Public methods.
 	
