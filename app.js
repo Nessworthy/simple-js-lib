@@ -41,6 +41,7 @@ function App(options) {
 	var functions = {};
 	var events = {};
 	var settings = {};
+	// TODO: Change addedModules -> []{moduleName, config}
 	var addedModules = {'order': [], 'reference': {}};
 	
 	// MODULES
@@ -211,8 +212,6 @@ function App(options) {
 	 */
 	function loadModule(module_name, module_config) {
 		
-		// TODO: This method is currently deprecated because of the queue system. Integrate it with queue before using!
-		
 		var logName = [settings.debug.nameSpaceCore,'loadModule'];
 		
 		console.group("Module: "+module_name)
@@ -304,6 +303,7 @@ function App(options) {
 				if(!moduleExists) {
 					index = addedModules.order.length;
 				} else {
+					// TODO: removeModuleFromQueue()
 					// So it gets a little more complicated if we need to overwrite a module.
 					// Since we're not keeping the order, all values after the existing one will be shifted down one,
 					// So we need to update their references.
@@ -344,6 +344,16 @@ function App(options) {
 		return false;
 		
 	}
+
+	/**
+	 * loadAllModulesFromQueue - Self explanitory. 
+	 */
+	function loadAllModulesFromQueue() {
+		
+	}
+
+	// TODO: removeModuleFromQueue(moduleName or loadIndex)
+	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as !important
 
 	// Public methods.
 	
