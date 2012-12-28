@@ -121,7 +121,7 @@ function App(options) {
 	 * Fire - Fires all callback triggers for a specific event.
 	 * @param {String} trigger_name The event's name.
 	 * @param {Mixed} details The event information. E.g. a specific element.
-	 * @return {Boolean} TRUE if all triggers were fired. FALSE if not.
+	 * @return {Boolean} TRUE if all triggers were fired. FALSE if not
 	 */
 	function fire(trigger_name, details) {
 		var logName = [settings.debug.nameSpaceCore,'fire'];
@@ -212,6 +212,7 @@ function App(options) {
 		console.group("Module: "+module_name)
 		console.time('Load Time');
 		if(typeof modules[module_name] == 'function') {
+			
 			try {
 				
 				var result = modules[module_name](module_config);
@@ -227,6 +228,7 @@ function App(options) {
 			} catch (error) {
 				log(logName,['Module has encountered an uncaught exception', error],'error');
 			}
+			
 		} else {
 			log(logName,['Module failed to load:','Module not located'],'error');
 		}
