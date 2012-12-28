@@ -1,5 +1,5 @@
 /**
- * App - Default lightweight framework for small JavaScript applications.
+ * App - Default lightweight framework for small JavaScript applications, with an added queue system!
  * @author Sean Nessworthy
  */
 function App(options) {
