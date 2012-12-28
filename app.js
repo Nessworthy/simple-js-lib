@@ -229,12 +229,13 @@ function App(options) {
 	}
 
 	// Public methods.
-	self.addModule = function(moduleName, module, loadOnImport, options) {
+	self.addModule = function(moduleName, module, autoLoad) {
 		
 		// Import it.
-		importModule(moduleName,module);
+		result = importModule(moduleName,module);
 		
-		if(loadOnImport === true || (settings.modules.autoLoadOnImport === true)) {
+		// Are we autoloading the module?
+		if(result === true && (autoLoad === true || settings.modules.autoLoadOnImport === true)) {
 			
 			// Load it.
 			loadModule(moduleName, options);
