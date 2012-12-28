@@ -25,7 +25,9 @@ function App(options) {
 		// Handles modules
 		'modules': {
 			// If enabled, any additional modules added via loadModule will overwrite any existing ones.
-			'allowOverwrite' : true
+			'allowOverwrite' : true,
+			// If TRUE, any mods imported using app.addModule will be automatically loaded. NOTE that this will prevent any options being passed to it.
+			'autoLoadOnImport': true
 		},
 		// Default module list. Use this for constant core modules.
 		'moduleList' : []
@@ -217,6 +219,7 @@ function App(options) {
 				} else {
 					log(logName,'Module loaded, but did not return the expected information.','warn');
 				}
+				
 			} catch (error) {
 				log(logName,['Module has encountered an uncaught exception:', error],'error');
 			}
@@ -229,17 +232,42 @@ function App(options) {
 	}
 
 	// Public methods.
+	
+	/**
+	 * addModule - Adds a module to the application. Optional support for auto loading.
+	 * @param {String} moduleName The module's name.
+	 * @param {Function} module The module.
+	 * @param {Boolean} autoLoad Whether to autoload the module or not (optional, default = FALSE)
+	 */
 	self.addModule = function(moduleName, module, autoLoad) {
+		var logName = [settings.debug.nameSpaceCore,'addModule'];
 		
-		// Import it.
-		result = importModule(moduleName,module);
+		if(typeof moduleName == 'string') {
 		
-		// Are we autoloading the module?
-		if(result === true && (autoLoad === true || settings.modules.autoLoadOnImport === true)) {
+			if(typeof module == 'function') {
+				
+				if(autoLoad !== true) {
+					autoLoad = false;
+				}
+		
+				// Import it.
+				result = importModule(moduleName,module);
+				
+				// Are we auto loading the module?
+				if(result === true && (autoLoad === true || settings.modules.autoLoadOnImport === true)) {
+					
+					// Load it.
+					loadModule(moduleName, options);
+					
+				} else {
+					log(logName, 'Module could not be loaded.');
+				}
+			} else {
+				log(logName,['module expected a function.',module],'error');
+			}
 			
-			// Load it.
-			loadModule(moduleName, options);
-			
+		} else {
+			log(logName,['moduleName expected a string.',moduleName],'error');
 		}
 		
 	}
