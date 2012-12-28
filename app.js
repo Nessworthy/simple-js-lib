@@ -9,7 +9,7 @@ function App(options) {
 		// Handles bind() and call() options.
 		'globalFunctions': {
 			// If a bound function already exists with the same name, overwrite it? If not, bind() will return false.
-			'bindOverwrite' : true
+			'allowOverwrite' : true
 		},
 		// Handles everything to do with app debugging.
 		'debug': {
@@ -21,6 +21,11 @@ function App(options) {
 			'nameSpaceCore': 'core',
 			// Separator for app namespaces.
 			'nameSpaceSeparator': '.'
+		},
+		// Handles modules
+		'modules': {
+			// If enabled, any additional modules added via loadModule will overwrite any existing ones.
+			'allowOverwrite' : true
 		},
 		// Default module list. Use this for constant core modules.
 		'moduleList' : []
@@ -53,7 +58,7 @@ function App(options) {
 		if(typeof fn_name == 'string') {
 			if(typeof fn == 'function') {
 				
-				var allowedToOverwrite = settings.globalFunctions.bindOverWrite;
+				var allowedToOverwrite = settings.globalFunctions.allowOverwrite;
 				var functionExists = false;
 				
 				if(typeof functions[fn_name] == 'function') {
@@ -223,8 +228,22 @@ function App(options) {
 		
 	}
 
+	// Public methods.
+	self.addModule = function(moduleName, module, loadOnImport, options) {
+		
+		// Import it.
+		importModule(moduleName,module);
+		
+		if(loadOnImport === true || (settings.modules.autoLoadOnImport === true)) {
+			
+			// Load it.
+			loadModule(moduleName, options);
+			
+		}
+		
+	}
+
 	// Future dev
-	//	self.importModule(name, fn)
 
 	// Core startup
 	
