@@ -27,7 +27,9 @@ function App(options) {
 			// If enabled, any additional modules added via loadModule will overwrite any existing ones.
 			'allowOverwrite' : true,
 			// If TRUE, any mods imported using app.addModule will be automatically loaded. NOTE that this will prevent any options being passed to it.
-			'autoLoadOnImport': true
+			'autoLoadOnImport': false,
+			// If TRUE, all modules loaded with this application will be autoloaded on startup.
+			'autoLoadOnStart': false
 		},
 		// Default module list. Use this for constant core modules.
 		'moduleList' : []
@@ -39,6 +41,7 @@ function App(options) {
 	var functions = {};
 	var events = {};
 	var settings = {};
+	var addedModules = {'order': [], 'reference': {}};
 	
 	// MODULES
 	// (not order specific)
@@ -274,6 +277,71 @@ function App(options) {
 		return false;
 	}
 
+	/**
+	 * addModuleToQueue - Does exactly what it says on the tin.
+	 * @param {String} moduleName The module name.
+	 * @param {Mixed} moduleConfig Any config settings passed to the module.
+	 * @return {Boolean} TRUE if successful, FALSE if not.
+	 */
+	function addModuleToQueue(moduleName, moduleConfig) {
+		var logName = [settings.debug.nameSpaceCore,'addModuleToQueue'];
+		
+		if(typeof moduleName == 'string') {
+			
+			var moduleExists = false;
+			
+			if(typeof addedModules.reference[moduleName] != 'undefined') {
+				moduleExists = true;
+			}
+			
+			if(!moduleExists || settings.modules.allowOverwrite === true) {
+				
+				var index;
+				
+				if(!moduleExists) {
+					index = addedModules.order.length;
+				} else {
+					// So it gets a little more complicated if we need to overwrite a module.
+					// Since we're not keeping the order, all values after the existing one will be shifted down one,
+					// So we need to update their references.
+					
+					var oldIndex = addedModules.reference[moduleName];
+					
+					addedModules.order.splice(oldIndex,1);
+					
+					var modulesToUpdate = addedModules.order.slice(oldIndex);
+					
+					for(var i=0;i<modulesToUpdate.length;i++) {
+						addedModules.order[modulesToUpdate[i]]--;
+					}
+					
+					// Remember that if we're overwriting it, we're not actually adding a new value.
+					index = addedModules.order.length-1;
+				}
+				
+				// Add or overwrite. Also, make sure config is null if non-existant.
+				if(typeof moduleConfig == 'undefined') {
+					moduleConfig = null;
+				}
+				
+				addedModules.reference[moduleName].index = index;
+				addedModules.reference[moduleName].config = moduleConfig;
+				addedModules.order.push(moduleName);
+			
+				return true;
+				
+			} else {
+				log(logName,'Could not add '+moduleName+' to queue. The module already exists and cannot be overwritten with the current settings.','error');
+			}
+			
+		} else {
+			log(logName,['moduleName expected a string.',moduleName],'error');
+		}
+		
+		return false;
+		
+	}
+
 	// Public methods.
 	
 	/**
@@ -297,18 +365,25 @@ function App(options) {
 				result = importModule(moduleName,module);
 				
 				if(result === true) {
+					
 					log(logName,'Module '+moduleName+' imported!', 'info');
+					
+					// Are we autoloading?
+					if(autoLoad === true || (settings.modules.autoLoadOnImport === true && autoLoad !== false)) {
+						
+						// Load it.
+						loadModule(moduleName, options);
+						
+					} else {
+						
+						addModuleToQueue(moduleName);
+						
+					}
+					
 				} else {
 					log(logName,'Module '+moduleName+' was not imported.', 'error');
 				}
 				
-				// Are we auto loading the module?
-				if(result === true && (autoLoad === true || (settings.modules.autoLoadOnImport === true && autoLoad !== false))) {
-					
-					// Load it.
-					loadModule(moduleName, options);
-					
-				}
 			} else {
 				log(logName,['module expected a function.',module],'error');
 			}
@@ -318,27 +393,36 @@ function App(options) {
 		}
 		
 	}
+	
+	this.loadModules();
 
 	// Core startup
 	
 	settings = defaultSettings;
 	
-	// Load those modules, baby.
+	// Load those modules, baby. (or add them to the queue to load)
 	for(var i=0; i < settings.moduleList.length; i++) {
-		
+			
 		module_data = settings.moduleList[i];
-		
+			
 		module_config = null;
 		module_name = false;
-		
+			
 		if(typeof module_data != 'string') {
 			module_name = module_data[0];
 			module_config = module_data[1];
 		} else {
 			module_name = module_data;
 		}
+			
 		
-		loadModule(module_name, module_config);
+		if(settings.modules.autoLoadOnStart === true) {
+		
+			loadModule(module_name, module_config);
+			
+		} else {
+			addModuleToQueue(module_name, module_config);
+		}
 	}
 	
 }
