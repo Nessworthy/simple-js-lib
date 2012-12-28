@@ -418,6 +418,7 @@ function App(options) {
 	 */
 	function loadModuleFromQueue(moduleName) {
 		// TODO: Finish this method.
+		// Via. Feature branch.
 	}
 
 	// Public methods.
