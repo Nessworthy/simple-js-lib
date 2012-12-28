@@ -328,6 +328,7 @@ function App(options) {
 	 * loadAllModulesFromQueue - Self explanitory. 
 	 */
 	function loadAllModulesFromQueue() {
+		var logName = [settings.debug.nameSpaceCore,'loadAllModulesFromQueue'];
 		while(addedModules.length > 0) {
 			
 			var module = addedModules[0];
@@ -335,7 +336,10 @@ function App(options) {
 			loadModule(module.name,module.config);
 			
 			// Passing the index is faster.
-			removeModuleFromQueue(0);
+			if(removeModuleFromQueue(0) !== true) {
+				log(logName,'Could not remove module '+moduleName+' from the queue. Recursion prevented.','error');
+				break;
+			}
 			
 		}
 	}
@@ -349,7 +353,7 @@ function App(options) {
 		var logName = [settings.debug.nameSpaceCore,'removeModuleFromQueue'];
 		var returnVal = false;
 		
-		if (typeof module == 'integer') {
+		if (typeof module == 'number') {
 			if (typeof addedModules[module] != 'undefined') {
 				returnVal = true;
 				addedModules.splice(module,1);
@@ -408,7 +412,7 @@ function App(options) {
 		
 	}
 
-	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as !important
+	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as an override.
 
 	// Public methods.
 	
@@ -469,7 +473,12 @@ function App(options) {
 		
 	}
 	
-	this.loadModules();
+	/**
+	 * loadModules - self explanatory! 
+	 */
+	this.loadModules = function() {
+		loadAllModulesFromQueue();
+	}
 
 	// Core startup
 	
