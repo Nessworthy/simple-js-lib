@@ -15,6 +15,4 @@ How to Use:
 To Do:
 -----------
 
-+ Add a method to import/inject modules into the application.
-+ Add a method to load a module from the global scope.
 + Add a detailed how to guide.
