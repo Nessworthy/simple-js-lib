@@ -235,6 +235,7 @@ function App(options) {
 		
 	}
 	
+	// Requires documentation
 	function importModule(moduleName, module) {
 		var logName = [settings.debug.nameSpaceCore,'importModule'];
 		
