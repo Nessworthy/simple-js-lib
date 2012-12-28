@@ -41,8 +41,7 @@ function App(options) {
 	var functions = {};
 	var events = {};
 	var settings = {};
-	// TODO: Change addedModules -> []{moduleName, config}
-	var addedModules = {'order': [], 'reference': {}};
+	var addedModules = [];
 	
 	// MODULES
 	// (not order specific)
@@ -292,7 +291,7 @@ function App(options) {
 			
 			var moduleExists = false;
 			
-			if(typeof addedModules.reference[moduleName] != 'undefined') {
+			if (moduleExistsInQueue(moduleName)) {
 				moduleExists = true;
 			}
 			
@@ -300,36 +299,16 @@ function App(options) {
 				
 				var index;
 				
-				if(!moduleExists) {
-					index = addedModules.order.length;
-				} else {
-					// TODO: removeModuleFromQueue()
-					// So it gets a little more complicated if we need to overwrite a module.
-					// Since we're not keeping the order, all values after the existing one will be shifted down one,
-					// So we need to update their references.
-					
-					var oldIndex = addedModules.reference[moduleName];
-					
-					addedModules.order.splice(oldIndex,1);
-					
-					var modulesToUpdate = addedModules.order.slice(oldIndex);
-					
-					for(var i=0;i<modulesToUpdate.length;i++) {
-						addedModules.order[modulesToUpdate[i]]--;
-					}
-					
-					// Remember that if we're overwriting it, we're not actually adding a new value.
-					index = addedModules.order.length-1;
+				if(moduleExists) {
+					removeModuleFromQueue(moduleName);
 				}
 				
-				// Add or overwrite. Also, make sure config is null if non-existant.
+				// Add. Also, make sure config is null if non-existant.
 				if(typeof moduleConfig == 'undefined') {
 					moduleConfig = null;
 				}
 				
-				addedModules.reference[moduleName].index = index;
-				addedModules.reference[moduleName].config = moduleConfig;
-				addedModules.order.push(moduleName);
+				addedModules.push({name: moduleName, config: moduleConfig});
 			
 				return true;
 				
@@ -349,11 +328,71 @@ function App(options) {
 	 * loadAllModulesFromQueue - Self explanitory. 
 	 */
 	function loadAllModulesFromQueue() {
-		
+		while(addedModules.length > 0) {
+			
+			var module = addedModules[0];
+			
+			loadModule(module.name,module.config);
+			
+			// Passing the index is faster.
+			removeModuleFromQueue(0);
+			
+		}
 	}
 
+	/**
+	 * removeModuleFromQueue
+	 * @param {Mixed} module Either an index (queue) number or the module name. 
+	 * @return {Boolean} TRUE if successful, FALSE if not.
+	 */
+	function removeModuleFromQueue(module) {
+		var logName = [settings.debug.nameSpaceCore,'removeModuleFromQueue'];
+		var returnVal = false;
+		
+		if (typeof module == 'integer') {
+			if (typeof addedModules[module] != 'undefined') {
+				returnVal = true;
+				addedModules.splice(module,1);
+			} else {
+				returnVal = false;
+				log(logName,'Could not find module queue position '+moduleName+' in the queue.','warn');
+			}
+		} else if (typeof module == 'string') {
+			
+			// So here we need to iterate through the queue and find the module by name.
+			
+			var index = false;
+			
+			for(var i=0,queue=addedModules;i<queue.length;i++) {
+				
+				var mod = queue[i];
+				
+				
+				if(mod.name == module) {
+					index = i;
+					break;
+				} else {
+					continue;
+				}
+			}
+			
+			if(index !== false) {
+				returnVal = true;
+				addedModules.splice(index,1);
+			} else {
+				log(logName,'Could not find module '+moduleName+' in the queue.','warn');
+			}
+			
+		} else {
+			log(logName,['module expected an int or a string.',module],'error');
+		}
+		
+		return returnVal;
+		
+	}
 	// TODO: removeModuleFromQueue(moduleName or loadIndex)
 	// TODO: loadModuleFromQueue(moduleName or loadIndex) think of it as !important
+	// TODO: moduleExistsInQueue(moduleName)
 
 	// Public methods.
 	
