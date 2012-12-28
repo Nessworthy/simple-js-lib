@@ -237,6 +237,12 @@ function App(options) {
 		
 	}
 	
+	/**
+	 * importModule - Adds a module to the module list. This does NOT trigger autoload on its own.
+	 * @param {String} moduleName The module name.
+	 * @param {Function} module The module. 
+	 * @return {Boolean} TRUE if import was successful, FALSE if not.
+	 */
 	function importModule(moduleName, module) {
 		var logName = [settings.debug.nameSpaceCore,'importModule'];
 		
@@ -274,7 +280,7 @@ function App(options) {
 	 * addModule - Adds a module to the application. Optional support for auto loading.
 	 * @param {String} moduleName The module's name.
 	 * @param {Function} module The module.
-	 * @param {Boolean} autoLoad Whether to autoload the module or not (optional, default = FALSE)
+	 * @param {Boolean} autoLoad Whether to autoload the module or not (optional, default = NULL (relies on setting))
 	 */
 	this.addModule = function(moduleName, module, autoLoad) {
 		var logName = [settings.debug.nameSpaceCore,'addModule'];
