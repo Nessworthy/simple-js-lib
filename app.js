@@ -311,8 +311,6 @@ function App(options) {
 		
 	}
 
-	// Future dev
-
 	// Core startup
 	
 	settings = defaultSettings;
