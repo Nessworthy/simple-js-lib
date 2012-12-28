@@ -26,7 +26,7 @@ function App(options) {
 		'modules': {
 			// If enabled, any additional modules added via loadModule will overwrite any existing ones.
 			'allowOverwrite' : true,
-			// If TRUE, any mods imported using app.addModule will be automatically loaded. NOTE that this will prevent any options being passed to it.
+			// If TRUE, any mods imported using app.addModule will be automatically loaded.
 			'autoLoadOnImport': false,
 			// If TRUE, all modules loaded with this application will be autoloaded on startup.
 			'autoLoadOnStart': false
@@ -210,6 +210,9 @@ function App(options) {
 	 * @param {Mixed} module_config Any module options that should be passed to the module.
 	 */
 	function loadModule(module_name, module_config) {
+		
+		// TODO: This method is currently deprecated because of the queue system. Integrate it with queue before using!
+		
 		var logName = [settings.debug.nameSpaceCore,'loadModule'];
 		
 		console.group("Module: "+module_name)
@@ -422,14 +425,14 @@ function App(options) {
 			module_name = module_data;
 		}
 			
+		addModuleToQueue(module_name, module_config);
 		
-		if(settings.modules.autoLoadOnStart === true) {
+	}
+	
+	if(settings.modules.autoLoadOnStart === true) {
 		
-			loadModule(module_name, module_config);
+		loadAllModulesFromQueue();
 			
-		} else {
-			addModuleToQueue(module_name, module_config);
-		}
 	}
 	
 }
