@@ -46,8 +46,6 @@ function App(options) {
 	// MODULES
 	// (not order specific)
 	
-	
-	
 	// Define core functions
 	
 	/**
