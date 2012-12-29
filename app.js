@@ -456,7 +456,7 @@ function App(options) {
 					autoLoad = null;
 				}
 		
-				// Import it.
+				// Import it!
 				result = importModule(moduleName,module);
 				
 				if(result === true) {
