@@ -46,8 +46,6 @@ function App(options) {
 	// MODULES
 	// (not order specific)
 	
-	
-	
 	// Define core functions
 	
 	/**
@@ -456,7 +454,7 @@ function App(options) {
 					autoLoad = null;
 				}
 		
-				// Import it.
+				// Import it!
 				result = importModule(moduleName,module);
 				
 				if(result === true) {
@@ -496,11 +494,11 @@ function App(options) {
 		loadAllModulesFromQueue();
 	}
 
-	// Core startup
+	// Core startup!
 	
 	settings = defaultSettings;
 	
-	// Load those modules, baby. (or add them to the queue to load)
+	// Load those modules, baby! (or add them to the queue to load)
 	for(var i=0; i < settings.moduleList.length; i++) {
 			
 		module_data = settings.moduleList[i];
