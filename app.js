@@ -496,7 +496,7 @@ function App(options) {
 		loadAllModulesFromQueue();
 	}
 
-	// Core startup
+	// Core startup!
 	
 	settings = defaultSettings;
 	
