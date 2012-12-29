@@ -500,7 +500,7 @@ function App(options) {
 	
 	settings = defaultSettings;
 	
-	// Load those modules, baby. (or add them to the queue to load)
+	// Load those modules, baby! (or add them to the queue to load)
 	for(var i=0; i < settings.moduleList.length; i++) {
 			
 		module_data = settings.moduleList[i];
